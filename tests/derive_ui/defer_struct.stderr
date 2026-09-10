@@ -1,15 +1,5 @@
-error[E0308]: mismatched types
- --> tests/derive_ui/defer_struct.rs:2:19
+error: `defer` is only supported on `Parser` and `Subcommand` enums
+ --> tests/derive_ui/defer_struct.rs:2:11
   |
 2 | #[command(defer = true)]
-  |           -----   ^^^^ expected fn pointer, found `bool`
-  |           |
-  |           arguments to this method are incorrect
-  |
-  = note: expected fn pointer `fn(clap::Command) -> clap::Command`
-                   found type `bool`
-note: method defined here
- --> clap_builder/src/builder/command.rs
-  |
-  |     pub fn defer(mut self, deferred: fn(Command) -> Command) -> Self {
-  |            ^^^^^
+  |           ^^^^^

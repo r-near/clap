@@ -5,6 +5,7 @@ use clap::{Args, CommandFactory, Parser, Subcommand};
 #[test]
 fn named_fields() {
     #[derive(Parser)]
+    #[command(defer = true)]
     enum Cli {
         /// Add a file
         #[command(visible_alias = "a", version = "1.0")]
@@ -19,7 +20,7 @@ fn named_fields() {
         assert_eq!(add.get_about().unwrap().to_string(), "Add a file");
         assert_eq!(add.get_version(), Some("1.0"));
         assert_eq!(add.get_visible_aliases().collect::<Vec<_>>(), ["a"]);
-        assert_eq!(add.get_arguments().count(), 1);
+        assert_eq!(add.get_arguments().count(), 0);
         cmd.build();
         let file = cmd
             .find_subcommand("add")
@@ -34,6 +35,7 @@ fn named_fields() {
 #[test]
 fn newtype_with_flattened_args() {
     #[derive(Parser)]
+    #[command(defer = true)]
     enum Cli {
         Account(Account),
     }
@@ -60,8 +62,8 @@ fn newtype_with_flattened_args() {
 
     for (mut cmd, required) in [(Cli::command(), true), (Cli::command_for_update(), false)] {
         let account = cmd.find_subcommand("account").unwrap();
-        assert_eq!(account.get_arguments().count(), 2);
-        assert_eq!(account.get_subcommands().count(), 1);
+        assert_eq!(account.get_arguments().count(), 0);
+        assert_eq!(account.get_subcommands().count(), 0);
         cmd.build();
         let account = cmd.find_subcommand("account").unwrap();
         let account_id = account
@@ -90,6 +92,7 @@ fn initialization_runs_once() {
     }
 
     #[derive(Parser)]
+    #[command(defer = true)]
     enum Cli {
         #[command(about = about())]
         Selected {
@@ -103,16 +106,17 @@ fn initialization_runs_once() {
     }
 
     let cmd = Cli::command();
-    assert_eq!(ARGS.load(Ordering::SeqCst), 2);
+    assert_eq!(ARGS.load(Ordering::SeqCst), 0);
     assert_eq!(METADATA.load(Ordering::SeqCst), 1);
     cmd.try_get_matches_from(["test", "selected"]).unwrap();
-    assert_eq!(ARGS.load(Ordering::SeqCst), 2);
+    assert_eq!(ARGS.load(Ordering::SeqCst), 1);
     assert_eq!(METADATA.load(Ordering::SeqCst), 1);
 }
 
 #[test]
 fn flattened_and_nested_subcommands() {
     #[derive(Parser)]
+    #[command(defer = true)]
     enum Cli {
         #[command(flatten)]
         Flat(Commands),
@@ -121,6 +125,7 @@ fn flattened_and_nested_subcommands() {
     }
 
     #[derive(Subcommand)]
+    #[command(defer = true)]
     enum Commands {
         Run {
             #[arg(long)]
@@ -135,13 +140,14 @@ fn flattened_and_nested_subcommands() {
         .unwrap()
         .find_subcommand("run")
         .unwrap();
-    assert_eq!(flat.get_arguments().count(), 1);
-    assert_eq!(nested.get_arguments().count(), 1);
+    assert_eq!(flat.get_arguments().count(), 0);
+    assert_eq!(nested.get_arguments().count(), 0);
 }
 
 #[test]
 fn args_metadata() {
     #[derive(Parser)]
+    #[command(defer = true)]
     enum Cli {
         Run(Options),
     }
@@ -159,7 +165,7 @@ fn args_metadata() {
             .unwrap()
             .get_about()
             .map(ToString::to_string),
-        Some("From Args".into())
+        None
     );
     cmd.build();
     assert_eq!(
@@ -174,6 +180,7 @@ fn args_metadata() {
 #[test]
 fn eager_subcommands() {
     #[derive(Parser)]
+    #[command(defer = false)]
     enum Cli {
         Run {
             #[arg(long)]
@@ -201,7 +208,7 @@ fn default_initialization() {
     let cmd = Cli::command();
     assert_eq!(
         cmd.find_subcommand("run").unwrap().get_arguments().count(),
-        1
+        usize::from(!cfg!(feature = "unstable-v5"))
     );
 }
 
