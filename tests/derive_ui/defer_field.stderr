@@ -1,0 +1,5 @@
+error[E0599]: no method named `defer` found for struct `Arg` in the current scope
+ --> tests/derive_ui/defer_field.rs:3:11
+  |
+3 |     #[arg(defer = true)]
+  |           ^^^^^ method not found in `Arg`

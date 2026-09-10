@@ -348,6 +348,57 @@ Options:
 }
 
 #[test]
+fn flattened_enum_display_order() {
+    #[derive(Parser)]
+    #[command(next_display_order = 100)]
+    enum Parent {
+        First,
+        #[command(flatten, next_display_order = 20)]
+        Child(Child),
+        AfterChild,
+        #[command(flatten, next_display_order = 50)]
+        Other(Other),
+        Last,
+    }
+
+    #[derive(Subcommand)]
+    enum Child {
+        Zebra {
+            #[arg(long)]
+            flag: bool,
+        },
+        Alpha,
+    }
+
+    #[derive(Subcommand)]
+    #[command(next_display_order = 10)]
+    enum Other {
+        Run,
+    }
+
+    for mut cmd in [Parent::command(), Parent::command_for_update()] {
+        for build in [false, true] {
+            if build {
+                cmd.build();
+            }
+            for (name, order) in [
+                ("first", 100),
+                ("zebra", 20),
+                ("alpha", 21),
+                ("after-child", 22),
+                ("run", 10),
+                ("last", 11),
+            ] {
+                assert_eq!(
+                    cmd.find_subcommand(name).unwrap().get_display_order(),
+                    order
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn derive_order_no_next_order() {
     #[derive(Parser, Debug)]
     #[command(name = "test", version = "1.2")]

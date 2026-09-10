@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+ --> tests/derive_ui/defer_value.rs:2:19
+  |
+2 | #[command(defer = "true")]
+  |           -----   ^^^^^^ expected fn pointer, found `&str`
+  |           |
+  |           arguments to this method are incorrect
+  |
+  = note: expected fn pointer `fn(clap::Command) -> clap::Command`
+              found reference `&'static str`
+note: method defined here
+ --> clap_builder/src/builder/command.rs
+  |
+  |     pub fn defer(mut self, deferred: fn(Command) -> Command) -> Self {
+  |            ^^^^^

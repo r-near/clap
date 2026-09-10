@@ -1,0 +1,5 @@
+error: methods are not allowed for flattened entry
+ --> tests/derive_ui/defer_flatten.rs:3:15
+  |
+3 |     #[command(flatten, defer = true)]
+  |               ^^^^^^^
