@@ -139,6 +139,13 @@ fn app_help_heading_flattened() {
         .unwrap();
     assert_eq!(should_be_in_section_b.get_help_heading(), Some("HEADING B"));
 
+    #[cfg(feature = "unstable-v5")]
+    let cmd = {
+        let mut cmd = cmd;
+        cmd.build();
+        cmd
+    };
+
     let sub_a_two = cmd.find_subcommand("sub-a-two").unwrap();
 
     let should_be_in_sub_a = sub_a_two
